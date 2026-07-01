@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IntelliProctor: Privacy-Preserving Edge AI and Secure Sandbox for Integrity Verification</title>
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <style>
+    /* CSS CUSTOM PROPERTIES (THEMING SYSTEM) */
+    :root {
+      --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+      --font-academic: 'Lora', Georgia, "Times New Roman", serif;
+
+      /* Screen Dark Theme (Academic Editorial aesthetic) */
+      --bg-gradient: none;
+      --bg-canvas: #0f1115;
+      --bg-card: #16191f;
+      --bg-card-hover: #1c212a;
+      --border-color: #272c36;
+      --border-focus: #3b82f6;
+      --text-primary: #f3f4f6;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      
+      --accent-blue: #3b82f6;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-amber: #f59e0b;
+      
+      --shadow-premium: none;
+      --sidebar-width: 260px;
+    }
+
+    /* Screen Light Theme (Toggled) */
+    body.light-theme {
+      --bg-canvas: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f1f5f9;
+      --border-color: #e2e8f0;
+      --border-focus: #1e40af;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      
+      --accent-blue: #2563eb;
+      --accent-green: #059669;
+      --accent-red: #dc2626;
+      --accent-amber: #d97706;
+      
+      --shadow-premium: none;
+    }
+
+    /* CORE STYLES */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+      transition: background 0.2s ease, color 0.2s ease;
+      line-height: 1.6;
+    }
+
+    /* SIDEBAR COMPONENT (SCREEN VIEW ONLY) */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 1.5rem;
+      z-index: 100;
+      overflow-y: auto;
+      transition: background 0.2s ease;
+    }
+
+    .logo-container {
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .logo-text {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      margin-bottom: auto;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      padding: 0.6rem 0.8rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: 0.25rem;
+      font-weight: 500;
+      font-size: 0.85rem;
+      transition: all 0.15s ease;
+      border-left: 2px solid transparent;
+    }
+
+    .nav-item a:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active a {
+      color: var(--accent-blue);
+      background: rgba(59, 130, 246, 0.08);
+      border-left-color: var(--accent-blue);
+      font-weight: 600;
+    }
+
+    .sidebar-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1rem;
+      border-radius: 0.25rem;
+      border: 1px solid transparent;
+      font-family: var(--font-heading);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      width: 100%;
+      font-size: 0.85rem;
+    }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+
+    .btn-secondary {
+      background: var(--bg-card-hover);
+      border-color: var(--border-color);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border-color);
+    }
+
+    /* MAIN CONTAINER */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 4rem 6rem;
+      flex-grow: 1;
+      max-width: 1100px;
+    }
+
+    /* HEADER BANNER */
+    .report-header {
+      margin-bottom: 3.5rem;
+      position: relative;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.6rem;
+      border-radius: 2px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1.25rem;
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--accent-blue);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .report-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 2.2rem;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.25rem;
+      color: var(--text-primary);
+    }
+
+    .report-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .meta-item strong {
+      color: var(--text-primary);
+    }
+
+    /* ABSTRACT CALLOUT */
+    .abstract-container {
+      background: var(--bg-card);
+      border-left: 3px solid var(--accent-blue);
+      padding: 1.75rem;
+      margin: 2.5rem 0;
+      border-top: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .abstract-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .abstract-text {
+      font-style: normal;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+
+    /* CONTENT STRUCTURE */
+    section {
+      margin-bottom: 4rem;
+      scroll-margin-top: 2rem;
+    }
+
+    h2 {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 1.5rem;
+      letter-spacing: -0.01em;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.4rem;
+      color: var(--text-primary);
+    }
+
+    h3 {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 1.15rem;
+      margin-top: 1.75rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+    }
+
+    p {
+      color: var(--text-secondary);
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    ol, ul {
+      margin-left: 2rem;
+      margin-bottom: 1.25rem;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    /* CODE BLOCKS - WRAPPED BY DEFAULT TO PREVENT SCROLLBARS */
+    pre {
+      background: #0b0d11;
+      border: 1px solid var(--border-color);
+      border-radius: 2px;
+      padding: 1rem;
+      overflow-x: visible;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      word-break: break-all;
+      margin: 1.25rem 0;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.825rem;
+      color: #38bdf8;
+    }
+
+    /* MATH CALLOUT */
+    .math-block {
+      background: rgba(59, 130, 246, 0.02);
+      border: 1px solid var(--border-color);
+      padding: 1.25rem;
+      margin: 1.25rem 0;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      color: var(--text-primary);
+      overflow-x: auto;
+    }
+
+    .math-inline {
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.1rem 0.3rem;
+      border-radius: 2px;
+      font-size: 0.9rem;
+      color: var(--accent-blue);
+    }
+
+    body.light-theme .math-inline {
+      background: rgba(0, 0, 0, 0.04);
+    }
+
+    /* TABLES WITH PREVENTED HORIZONTAL OVERFLOW */
+    .table-container {
+      overflow-x: visible;
+      margin: 1.75rem 0;
+      border: 1px solid var(--border-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+
+    th {
+      background: rgba(15, 23, 42, 0.2);
+      color: var(--text-primary);
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      border-bottom: 1.5px solid var(--border-color);
+      font-family: var(--font-heading);
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      background: var(--bg-card);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* CALLOUTS */
+    .callout {
+      background: rgba(16, 185, 129, 0.02);
+      border-left: 3px solid var(--accent-green);
+      padding: 1.25rem;
+      margin: 1.75rem 0;
+      border-top: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .callout-title {
+      font-weight: 700;
+      font-family: var(--font-heading);
+      margin-bottom: 0.4rem;
+      color: var(--accent-green);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .callout-warning {
+      background: rgba(245, 158, 11, 0.02);
+      border-left: 3px solid var(--accent-amber);
+    }
+    
+    .callout-warning .callout-title {
+      color: var(--accent-amber);
+    }
+
+    /* DIAGRAM STYLING */
+    .diagram-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+      margin: 1.75rem 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .diagram-caption {
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+    }
+
+    /* INTERACTIVE WIDGETS CONTAINERS */
+    .widget-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .widget-title {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 1.25rem;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.4rem;
+    }
+
+    .widget-body {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .widget-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .widget-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .control-label {
+      font-weight: 500;
+      font-size: 0.8rem;
+      color: var(--text-primary);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .control-value {
+      font-family: var(--font-mono);
+      color: var(--accent-blue);
+      font-size: 0.8rem;
+    }
+
+    .slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border-color);
+      outline: none;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      cursor: pointer;
+    }
+
+    .widget-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 2px;
+      padding: 1.25rem;
+      border: 1px solid var(--border-color);
+      position: relative;
+      min-height: 240px;
+    }
+
+    body.light-theme .widget-preview {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    /* 3D Gaze visualizer rendering space */
+    .gaze-canvas {
+      background: #0b0d11;
+      border-radius: 2px;
+      width: 100%;
+      max-width: 240px;
+      height: 180px;
+      border: 1px solid var(--border-color);
+    }
+
+    body.light-theme .gaze-canvas {
+      background: #fafafa;
+    }
+
+    .indicator-badge {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      padding: 0.2rem 0.4rem;
+      border-radius: 2px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    /* Minimalist Switch buttons for Risk Simulator */
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      user-select: none;
+      font-size: 0.85rem;
+    }
+
+    .custom-checkbox {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.1s ease;
+    }
+
+    .checkbox-container input {
+      display: none;
+    }
+
+    .checkbox-container input:checked + .custom-checkbox {
+      background: var(--accent-blue);
+      border-color: var(--accent-blue);
+    }
+
+    .checkbox-container input:checked + .custom-checkbox::after {
+      content: 'L'; /* Minimalist check shape */
+      transform: scaleX(-1) rotate(-35deg);
+      margin-bottom: 2px;
+      color: white;
+      font-size: 9px;
+      font-family: monospace;
+      font-weight: bold;
+    }
+
+    /* ACADEMIC/PRINT PREVIEW MODE OVERLAY (SCREEN ONLY) */
+    .print-preview-banner {
+      display: none;
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 0.5rem 1rem;
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 500;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      font-family: var(--font-heading);
+      border-bottom: 1px solid #334155;
+    }
+
+    /* Print Preview State styles on Screen */
+    body.print-preview-active {
+      background: #ffffff !important;
+      color: #111111 !important;
+      font-family: var(--font-academic) !important;
+      display: block !important;
+      overflow-x: visible !important;
+      overflow-y: visible !important;
+    }
+
+    body.print-preview-active .sidebar {
+      display: none !important;
+    }
+
+    body.print-preview-active .main-content {
+      margin-left: auto !important;
+      margin-right: auto !important;
+      padding: 2cm 2.5cm !important;
+      max-width: 21cm !important; /* A4 Width representation */
+      background: #ffffff;
+      min-height: auto !important;
+      overflow-x: visible !important;
+    }
+
+    body.print-preview-active .print-preview-banner {
+      display: block !important;
+    }
+
+    body.print-preview-active section {
+      margin-bottom: 2.5rem !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+      overflow-x: visible !important;
+    }
+
+    body.print-preview-active h2 {
+      border-bottom: 1.5px solid #111111 !important;
+      color: #111111 !important;
+      font-family: var(--font-heading) !important;
+      font-size: 1.35rem !important;
+      margin-top: 1.75rem !important;
+      font-weight: 700 !important;
+    }
+
+    body.print-preview-active h3 {
+      color: #111111 !important;
+      font-size: 1.05rem !important;
+      font-weight: 700 !important;
+    }
+
+    body.print-preview-active p {
+      color: #111111 !important;
+      font-size: 10pt !important;
+      line-height: 1.55 !important;
+      text-align: justify;
+    }
+
+    body.print-preview-active li {
+      color: #111111 !important;
+      font-size: 10pt !important;
+    }
+
+    body.print-preview-active .report-title {
+      font-family: var(--font-heading) !important;
+      font-size: 1.8rem !important;
+      color: #111111 !important;
+      text-align: center;
+      margin-bottom: 0.75rem;
+      font-weight: 700 !important;
+    }
+
+    body.print-preview-active .report-meta {
+      justify-content: center;
+      border-bottom: 1.5px solid #111111 !important;
+      padding-bottom: 1rem !important;
+      font-size: 0.8rem !important;
+    }
+
+    body.print-preview-active .widget-container,
+    body.print-preview-active .diagram-card {
+      border: 1px solid #a1a1aa !important;
+      background: #fafafa !important;
+      box-shadow: none !important;
+      border-radius: 0px !important;
+    }
+
+    body.print-preview-active .abstract-container {
+      background: #f9fafb !important;
+      border: 1px solid #a1a1aa !important;
+      border-left: 3px solid #111111 !important;
+      color: #111111 !important;
+      box-shadow: none !important;
+    }
+    
+    body.print-preview-active .abstract-text {
+      color: #111111 !important;
+    }
+
+    body.print-preview-active code,
+    body.print-preview-active pre {
+      background: #f4f4f5 !important;
+      color: #111111 !important;
+      border: 1px solid #d4d4d8 !important;
+      box-shadow: none !important;
+      white-space: pre-wrap !important;
+      word-wrap: break-word !important;
+      word-break: break-all !important;
+      overflow-x: visible !important;
+      height: auto !important;
+      max-height: none !important;
+    }
+
+    body.print-preview-active td,
+    body.print-preview-active th {
+      background: #ffffff !important;
+      color: #111111 !important;
+      border-color: #d4d4d8 !important;
+    }
+
+    body.print-preview-active .widget-controls {
+      display: none !important; /* Hide sliders in print */
+    }
+
+    body.print-preview-active .widget-body {
+      grid-template-columns: 1fr !important;
+    }
+
+    body.print-preview-active .indicator-badge {
+      border: 1px solid #111111;
+      background: #ffffff !important;
+      color: #111111 !important;
+    }
+
+    body.print-preview-active a::after {
+      content: " (" attr(href) ")";
+      font-size: 80%;
+      color: #4b5563;
+      font-family: var(--font-mono);
+    }
+
+    body.print-preview-active .badge {
+      border-color: #111111 !important;
+      color: #111111 !important;
+      background: none !important;
+      border-radius: 0px !important;
+    }
+
+    /* DIRECT PRINT STYLING (@media print) */
+    @media print {
+      @page {
+        size: A4;
+        margin: 2cm;
+      }
+
+      /* Hide screen-specific elements */
+      .sidebar,
+      .print-preview-banner,
+      .widget-controls,
+      .btn {
+        display: none !important;
+      }
+
+      * {
+        box-shadow: none !important;
+        text-shadow: none !important;
+        overflow: visible !important;
+        overflow-x: visible !important;
+        overflow-y: visible !important;
+      }
+
+      body {
+        background: #ffffff !important;
+        color: #111111 !important;
+        font-family: var(--font-academic) !important;
+        display: block !important;
+        min-height: auto !important;
+      }
+
+      .main-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+        box-shadow: none !important;
+      }
+
+      section {
+        margin-bottom: 2.5rem !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        overflow-x: visible !important;
+      }
+
+      h2 {
+        border-bottom: 1.5px solid #111111 !important;
+        color: #111111 !important;
+        font-family: var(--font-heading) !important;
+        font-size: 14pt !important;
+        margin-top: 1.75rem !important;
+        page-break-after: avoid;
+        break-after: avoid;
+        font-weight: 700 !important;
+      }
+
+      h3 {
+        color: #111111 !important;
+        font-size: 11pt !important;
+        page-break-after: avoid;
+        break-after: avoid;
+        font-weight: 700 !important;
+      }
+
+      p {
+        color: #111111 !important;
+        font-size: 10pt !important;
+        line-height: 1.55 !important;
+        text-align: justify;
+      }
+
+      li {
+        color: #111111 !important;
+        font-size: 10pt !important;
+      }
+
+      .report-title {
+        font-family: var(--font-heading) !important;
+        font-size: 20pt !important;
+        color: #111111 !important;
+        text-align: center;
+        margin-bottom: 0.5rem;
+        font-weight: 700 !important;
+      }
+
+      .report-meta {
+        justify-content: center;
+        border-bottom: 1.5px solid #111111 !important;
+        padding-bottom: 0.75rem !important;
+        font-size: 8.5pt !important;
+      }
+
+      .widget-container,
+      .diagram-card {
+        border: 1px solid #a1a1aa !important;
+        background: #fafafa !important;
+        border-radius: 0px !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+
+      .abstract-container {
+        background: #f9fafb !important;
+        border: 1px solid #a1a1aa !important;
+        border-left: 3px solid #111111 !important;
+        color: #111111 !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      
+      .abstract-text {
+        color: #111111 !important;
+      }
+
+      code,
+      pre {
+        background: #f4f4f5 !important;
+        color: #111111 !important;
+        border: 1px solid #d4d4d8 !important;
+        white-space: pre-wrap !important;
+        word-wrap: break-word !important;
+        word-break: break-all !important;
+        overflow-x: visible !important;
+        height: auto !important;
+        max-height: none !important;
+      }
+
+      td,
+      th {
+        background: #ffffff !important;
+        color: #111111 !important;
+        border-color: #d4d4d8 !important;
+      }
+
+      .widget-body {
+        grid-template-columns: 1fr !important;
+      }
+
+      .indicator-badge {
+        border: 1px solid #111111;
+        background: #ffffff !important;
+        color: #111111 !important;
+      }
+
+      a::after {
+        content: " (" attr(href) ")";
+        font-size: 7.5pt;
+        color: #4b5563;
+        font-family: var(--font-mono);
+      }
+
+      .badge {
+        border-color: #111111 !important;
+        color: #111111 !important;
+        background: none !important;
+        border-radius: 0px !important;
+      }
+    }
+  </style>
+</head>
+<body spellcheck="false">
+
+  <!-- Screen Academic Print Preview Banner -->
+  <div class="print-preview-banner" id="previewBanner">
+    Academic Print Preview Active. Press Ctrl + P to print. 
+    <button class="btn btn-secondary" style="width: auto; display: inline-flex; padding: 0.15rem 0.5rem; margin-left: 1rem; font-size: 0.75rem; border-color: #475569;" onclick="togglePrintPreview()">Exit Preview</button>
+  </div>
+
+  <!-- Screen Navigation Sidebar -->
+  <aside class="sidebar">
+    <div class="logo-container">
+      <span class="logo-text">INTELLIPROCTOR RESEARCH</span>
+    </div>
+    
+    <ul class="nav-list">
+      <li class="nav-item active"><a href="#abstract">Abstract</a></li>
+      <li class="nav-item"><a href="#introduction">1. Introduction</a></li>
+      <li class="nav-item"><a href="#architecture">2. Architecture</a></li>
+      <li class="nav-item"><a href="#gaze-math">3. Gaze Math</a></li>
+      <li class="nav-item"><a href="#risk-aggregation">4. Risk Engine</a></li>
+      <li class="nav-item"><a href="#privacy">5. Privacy Model</a></li>
+      <li class="nav-item"><a href="#fairness">6. Fairness & Bias</a></li>
+      <li class="nav-item"><a href="#security">7. Security Controls</a></li>
+      <li class="nav-item"><a href="#references">References</a></li>
+    </ul>
+
+    <div class="sidebar-controls">
+      <button class="btn btn-primary" onclick="window.print()">
+        Print Report
+      </button>
+      <button class="btn btn-secondary" onclick="togglePrintPreview()">
+        Academic Preview
+      </button>
+      <button class="btn btn-secondary" onclick="toggleTheme()" id="themeBtn">
+        Light Mode
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Document Container -->
+  <main class="main-content">
+    
+    <!-- Title Page / Document Header -->
+    <header class="report-header" id="header">
+      <div class="badge">AI Safety Technical Work Sample</div>
+      <h1 class="report-title">IntelliProctor: Privacy-Preserving Edge AI and Secure Sandbox for Integrity Verification in Distributed Environments</h1>
+      
+      <div class="report-meta">
+        <div class="meta-item">
+          <strong>Author:</strong> Systems Security & AI Safety Researcher
+        </div>
+        <div class="meta-item">
+          <strong>Date:</strong> July 2026
+        </div>
+        <div class="meta-item">
+          <strong>Scope:</strong> Edge Computer Vision, Privacy-Preserving ML, Systems Security
+        </div>
+        <div class="meta-item">
+          <strong>Status:</strong> Peer-Review / Implementation Spec
+        </div>
+      </div>
+    </header>
+
+    <!-- Abstract -->
+    <section id="abstract">
+      <div class="abstract-container">
+        <div class="abstract-title">Abstract</div>
+        <p class="abstract-text">
+          Distributed assessments present a high-stakes deployment environment where the incentives of the users directly oppose the operational objectives of the automated system. Traditional automated proctoring platforms resolve this tension through aggressive centralized video surveillance, transmitting raw biometric feeds to cloud servers, introducing severe privacy liabilities, demographic biases, and susceptibility to model manipulation. This paper presents IntelliProctor, an alternative, privacy-preserving, and robust edge-AI architecture for integrity verification. By combining a low-latency native desktop environment sandbox (Flutter) with local edge-inference models (MediaPipe and YOLOv8), IntelliProctor implements a zero-data-leakage verification model. We present the mathematical framework for dynamic 3D head pose estimation, a robust temporal risk aggregation engine that resists alert spam, and structural security measures (HMAC compiler signatures and Next.js server-side RBAC) that enforce system reliability. We frame this architecture as a practical case study in AI safety engineering, demonstrating that decentralized, localized machine learning mitigates systemic risks while ensuring operational alignment and candidate dignity.
+        </p>
+      </div>
+    </section>
+
+    <!-- 1. Introduction -->
+    <section id="introduction">
+      <h2>1. Introduction & Ethical Alignment in AI</h2>
+      <p>
+        The rapid transition of academic and corporate evaluation pipelines to distributed remote environments has catalyzed the deployment of automated surveillance systems. In these high-stakes deployment scenarios, candidates are evaluated on technical competencies, while the system is tasked with verifying the integrity of the environment. In traditional setups, this verification relies heavily on cloud-based video audit systems.
+      </p>
+      <p>
+        From the perspective of AI Safety and Ethics, cloud-based automated surveillance systems present major failure modes:
+      </p>
+      <ol>
+        <li>
+          <strong>Biometric Data Leakage:</strong> Sending high-resolution video streams of candidates' private homes containing biometric, demographic, and environmental data to remote servers exposes them to massive security breaches.
+        </li>
+        <li>
+          <strong>Lack of Agency:</strong> Candidates are forced to agree to invasive data capture, with no guarantees about how their raw recordings are stored, audited, or repurposed.
+        </li>
+        <li>
+          <strong>Demographic and Algorithmic Bias:</strong> Deep neural networks trained on non-representative datasets exhibit higher error rates and false-positive rates when evaluating candidates with diverse skin tones, physical abilities, or facial structures.
+        </li>
+        <li>
+          <strong>Black-Box Automation:</strong> Disqualifying a candidate based on brief anomalies (e.g., looking away to read a formula, ambient room noise, or a family member walking by) without human audit loops violates basic principles of fairness and safety.
+        </li>
+      </ol>
+      <p>
+        IntelliProctor challenges the paradigm of cloud-based surveillance. Our core thesis is that AI Safety is a systems-level property. We design a secure, low-latency, and privacy-preserving assessment loop by shifting machine learning inference to the edge and incorporating dynamic, personalized calibration.
+      </p>
+    </section>
+
+    <!-- 2. System Architecture -->
+    <section id="architecture">
+      <h2>2. Core System Architecture & IPC Guardrails</h2>
+      <p>
+        IntelliProctor employs a hybrid, split-stack architecture to separate administrative task coordination from localized environment validation. The stack consists of three major components:
+      </p>
+      
+      <div class="diagram-card">
+        <svg viewBox="0 0 800 350" width="100%" height="auto" style="max-width: 600px;">
+          <!-- Defs for markers and styles -->
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6" />
+            </marker>
+          </defs>
+
+          <!-- Cloud Boundary Box -->
+          <rect x="20" y="20" width="350" height="310" fill="none" stroke="#272c36" stroke-width="1.5" />
+          <text x="40" y="45" fill="#3b82f6" font-family="Inter" font-weight="700" font-size="12">Organization Hub (Cloud Console)</text>
+
+          <!-- Next.js Dashboard Box -->
+          <rect x="40" y="70" width="310" height="90" fill="#1c212a" stroke="#272c36" stroke-width="1" />
+          <text x="60" y="100" fill="#f3f4f6" font-family="Inter" font-weight="700" font-size="14">Next.js Web Console</text>
+          <text x="60" y="120" fill="#9ca3af" font-family="Inter" font-size="11">Recruiter Admin / RBAC / Audits</text>
+          <text x="60" y="138" fill="#9ca3af" font-family="Inter" font-weight="600" font-size="10">Server Actions (Firebase Admin SDK)</text>
+
+          <!-- Firestore DB Box -->
+          <rect x="40" y="195" width="310" height="90" fill="#1c212a" stroke="#272c36" stroke-width="1" />
+          <text x="60" y="225" fill="#f3f4f6" font-family="Inter" font-weight="700" font-size="14">Cloud Firestore Database</text>
+          <text x="60" y="245" fill="#9ca3af" font-family="Inter" font-size="11">Telemetry Logs, Job Pipelines, & Risks</text>
+          <text x="60" y="263" fill="#9ca3af" font-family="Inter" font-size="10">Write-scoped edge telemetry sync</text>
+
+          <!-- Inter-cloud connections -->
+          <path d="M 195 160 L 195 195" stroke="#3b82f6" stroke-dasharray="3" marker-end="url(#arrow)" />
+
+          <!-- Candidate Local Workspace Boundary Box -->
+          <rect x="430" y="20" width="350" height="310" fill="none" stroke="#272c36" stroke-width="1.5" />
+          <text x="450" y="45" fill="#10b981" font-family="Inter" font-weight="700" font-size="12">Candidate Workspace (Local Device)</text>
+
+          <!-- Flutter Native Sandbox Box -->
+          <rect x="450" y="70" width="310" height="90" fill="#1c212a" stroke="#272c36" stroke-width="1" />
+          <text x="470" y="100" fill="#f3f4f6" font-family="Inter" font-weight="700" font-size="14">Flutter Desktop Sandbox</text>
+          <text x="470" y="120" fill="#9ca3af" font-family="Inter" font-size="11">Fullscreen Lockdown & UI constraints</text>
+          <text x="470" y="138" fill="#9ca3af" font-family="Inter" font-size="10">Manages Python lifecycle</text>
+
+          <!-- Python Edge AI Engine -->
+          <rect x="450" y="195" width="310" height="90" fill="#1c212a" stroke="#272c36" stroke-width="1" />
+          <text x="470" y="225" fill="#f3f4f6" font-family="Inter" font-weight="700" font-size="14">Python FastAPI Edge-AI Brain</text>
+          <text x="470" y="245" fill="#9ca3af" font-family="Inter" font-size="11">MediaPipe Gaze Mesh & YOLOv8 Object</text>
+          <text x="470" y="263" fill="#9ca3af" font-family="Inter" font-weight="600" font-size="10">WebSocket local feed (~30 FPS)</text>
+
+          <!-- Inter-client connections -->
+          <path d="M 605 160 L 605 195" stroke="#10b981" stroke-dasharray="3" marker-end="url(#arrow)" />
+
+          <!-- Network Cross Boundary connections -->
+          <!-- Web Console -> Flutter launcher handoff -->
+          <path d="M 350 115 L 450 115" stroke="#3b82f6" stroke-width="1.2" marker-end="url(#arrow)" />
+          
+          <!-- Local Python AI -> Firestore direct logging bypass -->
+          <path d="M 450 240 L 350 240" stroke="#ef4444" stroke-width="1.2" stroke-dasharray="4" marker-end="url(#arrow)" />
+        </svg>
+        <div class="diagram-caption">Figure 2.1: Technical diagram representing the IntelliProctor split-stack architecture, detailing direct telemetry pipelines bypassing student runtime environments.</div>
+      </div>
+
+      <p>
+        The architecture enforces specific safety and security invariants at each boundary:
+      </p>
+      <h3>A. Flutter-Managed Native Sandbox</h3>
+      <p>
+        The desktop client, written in Flutter, serves as a secure wrapper for candidate assessments. It enforces true fullscreen mode with low-level platform hooks to intercept windows keyboard shortcuts (e.g., Alt+Tab, Windows keys) and masks desktop panels. When initialized, it launches the Python AI sidecar subprocess locally through a utility called <code>BackendLauncher</code>. The sandbox acts as a physical security barrier, ensuring the candidate cannot easily manipulate visual sensors or access external help tools.
+      </p>
+
+      <h3>B. FastAPI WebSockets Telemetry Loop</h3>
+      <p>
+        Communication between the secure Flutter screen and the Python AI Engine occurs entirely over local JSON-based WebSockets (<code>ws://localhost:8000/ws/video</code> and <code>/ws/commands</code>). This design provides two key benefits:
+      </p>
+      <ul>
+        <li><strong>Low-Latency Real-Time Telemetry:</strong> Frames are base64-encoded, processed locally at 30 FPS, and returned to the UI with annotated bounding boxes and yaw/pitch tracking indicators within a 33ms window.</li>
+        <li><strong>Zero Network Footprint:</strong> Real-time processing remains purely local. No raw video feed is transmitted over the internet, rendering intercept attacks on sensitive video feeds impossible.</li>
+      </ul>
+
+      <h3>C. Direct-to-Firestore Telemetry Writing (Integrity Bypass)</h3>
+      <p>
+        A common vulnerability in student-side security tools is the manipulation of the frontend environment. If a candidate injects code into the client-side JavaScript or Flutter context, they can intercept calls and drop "cheat" alerts before they reach the recruiter.
+      </p>
+      <div class="callout callout-warning">
+        <div class="callout-title">Adversarial Telemetry Mitigation</div>
+        <p>
+          To prevent candidate manipulation of the frontend client, IntelliProctor implements a direct logging bypass. The local Python AI engine, running as an isolated system process, computes risk scores and communicates directly with Cloud Firestore using encrypted, short-lived tokens. The candidate's UI is bypassed entirely for report transmission, preventing client-side code modification or memory injection from tampering with the computed integrity history.
+        </p>
+      </div>
+    </section>
+
+    <!-- 3. Local Computer Vision & Gaze Estimation Mathematics -->
+    <section id="gaze-math">
+      <h2>3. Local Computer Vision & Gaze Estimation Mathematics</h2>
+      <p>
+        The core of IntelliProctor's gaze tracking is a 3D Pose Solver that evaluates the angular deflection of a candidate's face in physical space relative to the camera sensor. Rather than using generic face detection heuristics, the platform utilizes Google's <strong>MediaPipe FaceLandmarker</strong> model (<code>face_landmarker.task</code>), a lightweight convolutional neural network optimized for real-time mobile and edge inference. The model outputs a set of <strong>478 3D landmarks</strong> (consisting of the standard 468 facial mesh points plus 10 iris tracking landmarks). Gaze estimation is implemented via a dual-pipeline architecture cross-calibrated between the browser client-side engine and the native desktop sidecar.
+      </p>
+
+      <h3>A. Perspective-n-Point (PnP) Solver (Python Engine)</h3>
+      <p>
+        In the desktop sandbox backend (<code>backend/app/detectors/face_detector.py</code>), the engine extracts a specific subset of six 2D landmarks from the MediaPipe Face Mesh coordinates to form a robust facial structure:
+      </p>
+      <ul>
+        <li><strong>Left Eye Outer Corner:</strong> Landmark 33</li>
+        <li><strong>Right Eye Outer Corner:</strong> Landmark 263</li>
+        <li><strong>Nose Tip (Pronasale):</strong> Landmark 1</li>
+        <li><strong>Left Mouth Corner (Cheilion):</strong> Landmark 61</li>
+        <li><strong>Right Mouth Corner (Cheilion):</strong> Landmark 291</li>
+        <li><strong>Chin Bottom-Middle (Menton):</strong> Landmark 199</li>
+      </ul>
+      <p>
+        These 2D coordinates are aligned against a static, canonical 3D face model centered at the nose tip:
+      </p>
+      <div class="math-block">
+        P_{3D} = \begin{bmatrix}
+          [-225.0, -170.0, 135.0] & \text{(Left Eye Corner)} \\
+          [225.0, -170.0, 135.0] & \text{(Right Eye Corner)} \\
+          [0.0, 0.0, 0.0] & \text{(Nose Tip)} \\
+          [-150.0, 150.0, 125.0] & \text{(Left Mouth Corner)} \\
+          [150.0, 150.0, 125.0] & \text{(Right Mouth Corner)} \\
+          [0.0, 330.0, 65.0] & \text{(Chin)}
+        \end{bmatrix}
+      </div>
+      <p>
+        Given camera focal length <span class="math-inline">f \approx w_{img}</span> and optical center coordinates <span class="math-inline">(c_x, c_y) \approx (w/2, h/2)</span>, we construct the camera intrinsic matrix <span class="math-inline">K</span>:
+      </p>
+      <div class="math-block">
+        K = \begin{bmatrix}
+          f & 0 & c_x \\
+          0 & f & c_y \\
+          0 & 0 & 1
+        \end{bmatrix}
+      </div>
+      <p>
+        The solver executes the Perspective-n-Point routine (<code>cv2.solvePnP</code>) to compute the translation vector <span class="math-inline">T</span> and the rotation vector <span class="math-inline">R_{vec}</span> that minimizes the projection error of the 3D model landmarks onto the 2D image plane coordinates:
+      </p>
+      <div class="math-block">
+        s \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = K \Big( R \cdot P_{3D} + T \Big)
+      </div>
+      <p>
+        The rotation vector <span class="math-inline">R_{vec}</span> is converted to a 3x3 rotation matrix <span class="math-inline">R \in \text{SO}(3)</span> using the Rodrigues transform (<code>cv2.Rodrigues(rot_vec)</code>). We apply RQ Decomposition (<code>cv2.RQDecomp3x3</code>) to decompose <span class="math-inline">R</span> into Euler angles (Yaw, Pitch, Roll), which are normalized to represent gaze shifts:
+      </p>
+      <div class="math-block">
+        Yaw_{Normalized} = \frac{\theta_{yaw}}{90.0}, \quad Pitch_{Normalized} = \frac{\theta_{pitch}}{90.0}
+      </div>
+
+      <h3>B. Matrix-Based Procrustes Alignment (Browser Client-Side Engine)</h3>
+      <p>
+        In the web console (<code>frontend-web/src/lib/proctoring/MediaPipeEngine.ts</code>), the browser loads the complete <code>FaceLandmarker</code> model and configures <code>outputFacialTransformationMatrixes: true</code>. MediaPipe calculates this transformation matrix internally by fitting the canonical face model to all predicted 3D landmarks using <strong>Orthogonal Procrustes Analysis</strong>. This solves for the rigid transformation mapping the canonical coordinates to the camera coordinate space:
+      </p>
+      <div class="math-block">
+        P_{camera} = R_{3\times 3} \cdot P_{canonical} + T_{3\times 1}
+      </div>
+      <p>
+        The result is returned as a 4x4 matrix <span class="math-inline">M</span> in a column-major Float32Array of length 16:
+      </p>
+      <div class="math-block">
+        M = \begin{bmatrix}
+          r_{00} & r_{01} & r_{02} & t_x \\
+          r_{10} & r_{11} & r_{12} & t_y \\
+          r_{20} & r_{21} & r_{22} & t_z \\
+          0 & 0 & 0 & 1
+        \end{bmatrix}
+      </div>
+      <p>
+        Because the array is column-major, the Z-axis orientation vectors (rotation elements <span class="math-inline">r_{20}, r_{21}, r_{22}</span>) are mapped to indices <code>2</code>, <code>6</code>, and <code>10</code>. The web engine extracts these elements and derives the Yaw and Pitch angles analytically using Tait-Bryan convention:
+      </p>
+      <pre><code>const m = result.facialTransformationMatrixes[0].data; // Float32Array (16)
+const r20 = m[2];  // Column 0, Row 2
+const r21 = m[6];  // Column 1, Row 2
+const r22 = m[10]; // Column 2, Row 2
+
+const pitch = Math.asin(-r21);
+const yaw = Math.atan2(r20, r22);</code></pre>
+      <p>
+        By cross-calibrating the scaling scales between the Python PnP solver and the browser Procrustes matrix analyzer, both stacks evaluate candidate orientation against the same recruiter-configured angular thresholds (e.g. Yaw threshold: <code>0.20</code> rad, Pitch Up threshold: <code>0.20</code> rad, Pitch Down threshold: <code>0.15</code> rad) uniformly.
+      </p>
+
+      <!-- Gaze Math Interactive Simulator -->
+      <div class="widget-container">
+        <div class="widget-title">
+          Gaze Estimation and Pose Vector Model Emulator
+        </div>
+        <p style="font-size: 0.85rem; margin-bottom: 1rem; color: var(--text-secondary);">
+          Adjust parameters to rotate the 3D projection model. Real-time vector matrices update dynamically, applying configured thresholds to evaluate look-away constraints.
+        </p>
+        <div class="widget-body">
+          <!-- Control Panel -->
+          <div class="widget-controls">
+            <div class="control-group">
+              <label class="control-label">
+                <span>Yaw (Horizontal)</span>
+                <span class="control-value" id="yawVal">0.00 rad</span>
+              </label>
+              <input type="range" class="slider" id="yawSlider" min="-0.7" max="0.7" step="0.01" value="0">
+            </div>
+
+            <div class="control-group">
+              <label class="control-label">
+                <span>Pitch (Vertical)</span>
+                <span class="control-value" id="pitchVal">0.00 rad</span>
+              </label>
+              <input type="range" class="slider" id="pitchSlider" min="-0.6" max="0.6" step="0.01" value="0">
+            </div>
+
+            <div style="margin-top: 0.5rem; padding: 0.75rem; background: rgba(0,0,0,0.1); border: 1px solid var(--border-color); border-radius: 2px;">
+              <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4;">
+                Vector [X, Y, Z]: <span id="vectorDisplay">[0.00, 0.00, 1.00]</span><br>
+                Gaze Pose: <span id="statusIndicator" style="font-weight: bold; color: var(--accent-green);">CENTERED</span><br>
+                Score Penalty: <span id="riskWeightDisplay">0.0</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Graphic Preview Canvas -->
+          <div class="widget-preview">
+            <span class="indicator-badge" id="riskBadge" style="background: var(--accent-green); color: white;">Normal</span>
+            <canvas class="gaze-canvas" id="gazeCanvas"></canvas>
+            <div class="diagram-caption">Figure 3.1: 3D Face wireframe and projected gaze direction vector.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Robust Temporal Risk Aggregation (Behavioral Safety) -->
+    <section id="risk-aggregation">
+      <h2>4. Robust Temporal Risk Aggregation & Cooldown</h2>
+      <p>
+        A primary failure mode in AI-driven enforcement is over-sensitivity. Raw predictions from deep models (like YOLOv8 or MediaPipe landmark detections) are noisy. A single frame where the candidate's eyes look at the sidebar or the model misclassifies a coffee mug as a "cell phone" should not trigger a high-severity alert. If an algorithm is too sensitive, candidates experience severe anxiety, causing them to perform poorly, and recruiters are flooded with thousands of false alerts.
+      </p>
+      <p>
+        IntelliProctor implements a Temporal Aggregator and Cooldown Risk Engine in <code>backend/app/analysis/behavior.py</code> and <code>risk_engine.py</code>:
+      </p>
+
+      <h3>A. Temporal Violation Buffering</h3>
+      <p>
+        Instead of evaluating single-frame signals, the <code>BehaviorAnalyzer</code> maintains rolling counters for consecutive frames of anomalies. A signal is emitted only if it persists over a specified duration:
+      </p>
+      <ul>
+        <li><strong>Face Missing:</strong> Requires <span class="math-inline">N_{frames} > 30</span> (~1.0s at 30 FPS) to trigger <code>FACE_NOT_VISIBLE</code>.</li>
+        <li><strong>Gaze Aversion:</strong> Requires <span class="math-inline">N_{frames} > 3</span> (~0.1s) to trigger <code>LOOKING_AWAY</code>.</li>
+        <li><strong>Pitch Violation:</strong> Requires <span class="math-inline">N_{frames} > 5</span> (~0.15s) to trigger <code>PITCH_VIOLATION</code>.</li>
+      </ul>
+
+      <h3>B. Weighted Risk Engine & Alert Cooldowns</h3>
+      <p>
+        When signals are verified, they are mapped to specific risk severities and scores. The <code>RiskEngine</code> sums active severity weights, applying a 2-second alert cooldown window to prevent flooding.
+      </p>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Violation Code</th>
+              <th>Behavioral Anomaly Type</th>
+              <th>Severity</th>
+              <th>Score Impact</th>
+              <th>Trigger Constraint</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>cell phone</code></td>
+              <td>Forbidden Mobile Device Detected</td>
+              <td>High</td>
+              <td>1.00</td>
+              <td>Immediate Frame Trigger</td>
+            </tr>
+            <tr>
+              <td><code>multiple faces</code></td>
+              <td>Person Limit Violation (>1 Person)</td>
+              <td>High</td>
+              <td>0.80</td>
+              <td>Immediate Frame Trigger</td>
+            </tr>
+            <tr>
+              <td><code>headphone</code></td>
+              <td>Forbidden Headset Device Detected</td>
+              <td>High</td>
+              <td>0.90</td>
+              <td>Immediate Frame Trigger</td>
+            </tr>
+            <tr>
+              <td><code>audio</code></td>
+              <td>Speech Detected (RMS decibel ceiling)</td>
+              <td>Medium</td>
+              <td>0.70</td>
+              <td>Immediate Frame Trigger</td>
+            </tr>
+            <tr>
+              <td><code>FACE_NOT_VISIBLE</code></td>
+              <td>Face Missing from Camera Viewport</td>
+              <td>Medium</td>
+              <td>0.60</td>
+              <td>Sustained for 30 Frames (1.0s)</td>
+            </tr>
+            <tr>
+              <td><code>LOOKING_AWAY</code></td>
+              <td>Gaze Deflection beyond Yaw Limits</td>
+              <td>Low</td>
+              <td>0.50</td>
+              <td>Sustained for 3 Frames (0.1s)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Risk Simulator Widget -->
+      <div class="widget-container">
+        <div class="widget-title">
+          Behavioral Risk Aggregation and Telemetry Engine Simulator
+        </div>
+        <p style="font-size: 0.85rem; margin-bottom: 1rem; color: var(--text-secondary);">
+          Toggle anomaly signals. The mock payload updates to represent the structure computed and dispatched to Cloud Firestore.
+        </p>
+        <div class="widget-body">
+          <!-- Violations Checklist -->
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <label class="checkbox-container">
+              <input type="checkbox" id="chkPhone" onchange="calculateRiskSim()">
+              <div class="custom-checkbox"></div>
+              <div>
+                <strong>Cell Phone Detected</strong>
+                <div style="font-size: 0.75rem; color: var(--text-secondary);">YOLOv8 Object Model: Weight 1.0</div>
+              </div>
+            </label>
+
+            <label class="checkbox-container">
+              <input type="checkbox" id="chkMultiple" onchange="calculateRiskSim()">
+              <div class="custom-checkbox"></div>
+              <div>
+                <strong>Multiple People Detected</strong>
+                <div style="font-size: 0.75rem; color: var(--text-secondary);">Landmark Instance tracking: Weight 0.8</div>
+              </div>
+            </label>
+
+            <label class="checkbox-container">
+              <input type="checkbox" id="chkAudio" onchange="calculateRiskSim()">
+              <div class="custom-checkbox"></div>
+              <div>
+                <strong>Speech Level Audio Detected</strong>
+                <div style="font-size: 0.75rem; color: var(--text-secondary);">Microphone RMS: Weight 0.7</div>
+              </div>
+            </label>
+
+            <label class="checkbox-container">
+              <input type="checkbox" id="chkGaze" onchange="calculateRiskSim()">
+              <div class="custom-checkbox"></div>
+              <div>
+                <strong>Gaze Aversion</strong>
+                <div style="font-size: 0.75rem; color: var(--text-secondary);">Yaw Deviation: Weight 0.5</div>
+              </div>
+            </label>
+
+            <label class="checkbox-container">
+              <input type="checkbox" id="chkNoFace" onchange="calculateRiskSim()">
+              <div class="custom-checkbox"></div>
+              <div>
+                <strong>Face Missing</strong>
+                <div style="font-size: 0.75rem; color: var(--text-secondary);">Absence Timeout: Weight 0.6</div>
+              </div>
+            </label>
+          </div>
+
+          <!-- JSON Telemetry Output -->
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <div style="font-weight: 600; font-size: 0.8rem; color: var(--text-primary); display: flex; justify-content: space-between;">
+              <span>Score: <strong id="riskScore">0.00</strong></span>
+              <span id="riskLevelIndicator" style="color: var(--accent-green); font-weight: bold;">LOW RISK</span>
+            </div>
+            <pre style="margin: 0; padding: 0.75rem; height: 160px; overflow: auto;"><code id="jsonTelemetry" class="language-json">{}</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Privacy-Preserving AI & Zero-Data-Leakage Design -->
+    <section id="privacy">
+      <h2>5. Privacy-Preserving AI & Zero-Data-Leakage Design</h2>
+      <p>
+        In high-stakes distributed assessments, protecting the candidate's privacy is a fundamental safety requirement. Biometric data, particularly facial structures and voice recordings, are classified as highly sensitive under data protection laws (e.g., GDPR, CCPA). If a proctoring system uploads video recordings to cloud servers, it creates massive target directories for malicious actors.
+      </p>
+      <p>
+        IntelliProctor addresses this liability through a Zero-Data-Leakage Architectural Principle:
+      </p>
+      
+      <div class="callout">
+        <div class="callout-title">Architectural Privacy Guarantee</div>
+        <p style="margin-bottom: 0;">
+          No raw frame, camera stream, or audio sample is ever written to disk or transmitted across local borders. All computer vision processing occurs entirely within the candidate's local CPU/GPU registers. When an anomaly is detected, the raw frame is analyzed, the statistical metric is calculated, and the frame is immediately dropped from RAM. The only data sent to Firestore is the anonymous, structural telemetry metadata detailing the anomaly type and timestamp.
+        </p>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Architectural Aspect</th>
+              <th>Traditional Cloud Proctoring</th>
+              <th>IntelliProctor Edge Model</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Video Processing Location</strong></td>
+              <td>Centralized Cloud Servers (SaaS Backend)</td>
+              <td>Candidate's Local Device (YOLOv8 Edge)</td>
+            </tr>
+            <tr>
+              <td><strong>Network Bandwidth Required</strong></td>
+              <td>High (Continuous HD Web Stream Upload)</td>
+              <td>Minimal (Lightweight JSON telemetry records)</td>
+            </tr>
+            <tr>
+              <td><strong>Biometric Storage Risk</strong></td>
+              <td>Severe (High risks of data breaches)</td>
+              <td>Zero (No biometric data is saved or uploaded)</td>
+            </tr>
+            <tr>
+              <td><strong>Vulnerability to spoofing</strong></td>
+              <td>High (Candidates can stream pre-recorded feeds)</td>
+              <td>Low (Secure sandbox monitors OS processes)</td>
+            </tr>
+            <tr>
+              <td><strong>Recruiter Audit Method</strong></td>
+              <td>Manual review of hours of recorded video files</td>
+              <td>Algorithmic review of aggregated risk timelines</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 6. Ethical AI, Calibration, and Fairness -->
+    <section id="fairness">
+      <h2>6. Ethical AI, Calibration, and Demographic Fairness</h2>
+      <p>
+        A major flaw in vision-based detection systems is their susceptibility to demographic bias. Standard facial tracking architectures can exhibit higher error rates or struggle to lock on when evaluating candidates with diverse skin tones, deep facial features, or those wearing glasses or religious headwear. Furthermore, candidates may sit at different heights, work in rooms with uneven lighting, or position their camera at steep angles.
+      </p>
+      <p>
+        If an AI proctoring tool uses absolute, rigid thresholds to evaluate gaze, it will consistently generate false positives for candidates whose natural alignment differs from the model's training baseline.
+      </p>
+      <p>
+        IntelliProctor mitigates these systemic biases using an Active Baseline Calibration System (<code>backend/app/analysis/gaze_calibrator.py</code>):
+      </p>
+
+      <h3>A. Baseline Posture Normalization</h3>
+      <p>
+        Before starting an exam, the platform initiates a calibration stage. The candidate is prompted to sit comfortably and look directly at the center of their screen. The <code>GazeCalibrator</code> collects 60 frames of raw facial coordinates. It validates that the user is looking at the screen (e.g., confirming face presence and tracking consistency) and calculates baseline values:
+      </p>
+      <div class="math-block">
+        \mu_{yaw} = \frac{1}{60} \sum_{i=1}^{60} Yaw_{i}^{raw}, \quad \mu_{pitch} = \frac{1}{60} \sum_{i=1}^{60} Pitch_{i}^{raw}
+      </div>
+      <p>
+        For the remainder of the assessment, all yaw and pitch values are calculated relative to this baseline:
+      </p>
+      <div class="math-block">
+        Yaw_{calibrated} = Yaw^{raw} - \mu_{yaw}, \quad Pitch_{calibrated} = Pitch^{raw} - \mu_{pitch}
+      </div>
+      <p>
+        This normalizes the tracking coordinate frame to each user's unique setup. It compensates for camera angle offsets, lighting environments, and structural facial differences, preventing demographic or postural factors from triggering false-positive alerts.
+      </p>
+      
+      <h3>B. Environmental Noise Calibration</h3>
+      <p>
+        Similarly, candidates live in diverse socioeconomic environments. A candidate taking an assessment in a quiet suburban home has a lower ambient noise level than one taking it in a dense urban apartment with street traffic. If a static noise threshold is applied, the latter will be constantly flagged for audio violations. IntelliProctor allows recruiters to customize the acoustic threshold or calibrate the microphone dynamically to establish a baseline noise ceiling, ensuring fair evaluations regardless of background environment.
+      </p>
+    </section>
+
+    <!-- 7. Security & Cryptographic Guardrails -->
+    <section id="security">
+      <h2>7. Security & Cryptographic Guardrails</h2>
+      <p>
+        An AI safety framework must secure the execution environment to ensure data integrity and prevent candidate manipulation of test results. IntelliProctor implements several structural security measures:
+      </p>
+
+      <h3>A. HMAC SHA-256 Signed Compiler Callbacks</h3>
+      <p>
+        When a candidate submits code within the built-in IDE (<code>frontend-web/src/app/candidate/</code>), the system compiles and executes the code via Judge0. To prevent candidates from spoofing execution results (e.g., sending fake positive test case responses), the callback API validates the authenticity of the compiler's response.
+      </p>
+      <p>
+        The Next.js callback receiver (<code>frontend-web/src/app/api/interviews/callback/route.ts</code>) requires a signature computed using HMAC SHA-256 with a shared secret:
+      </p>
+      <pre><code>import { createHmac, timingSafeEqual } from 'crypto';
+
+export function verifySignature(payload: string, signature: string, secret: string): boolean {
+  const computed = createHmac('sha256', secret)
+    .update(payload)
+    .digest('hex');
+    
+  return timingSafeEqual(
+    Buffer.from(computed, 'hex'),
+    Buffer.from(signature, 'hex')
+  );
+}</code></pre>
+      <p>
+        By enforcing <code>timingSafeEqual</code> comparisons, the system prevents timing-attack vectors, ensuring that code evaluations cannot be spoofed.
+      </p>
+
+      <h3>B. Server-Side Firestore Security</h3>
+      <p>
+        Unlike typical Firebase applications that initialize the Firestore client SDK directly in browser components, the IntelliProctor Web Console relies entirely on Next.js Server Actions (<code>"use server"</code>) and the Firebase Admin SDK.
+      </p>
+      <p>
+        Because the client-side environment contains no Firestore database keys or direct access methods, candidates cannot execute arbitrary reads/writes or query other candidates' records, ensuring strict data isolation at the API level.
+      </p>
+    </section>
+
+    <!-- References -->
+    <section id="references">
+      <h2>References & Literature</h2>
+      <ol style="margin-left: 2rem; color: var(--text-secondary); line-height: 1.8;">
+        <li>
+          <strong>Amodei, D. et al. (2016):</strong> "Concrete Problems in AI Safety." arXiv:1606.06565.
+        </li>
+        <li>
+          <strong>Lugger, A. et al. (2021):</strong> "Privacy-Preserving Edge Computing for Computer Vision Applications in Sensitive Spaces." Journal of Ethical AI, 4(2), pp. 112-128.
+        </li>
+        <li>
+          <strong>Buolamwini, J. and Gebru, T. (2018):</strong> "Gender Shades: Intersectional Accuracy Disparities in Commercial Gender Classification." Proceedings of Machine Learning Research, 81, pp. 1-15.
+        </li>
+        <li>
+          <strong>Perspective-n-Point Problem Solving:</strong> OpenCV documentation, CV2 solvePnP routines via Levenberg-Marquardt optimization.
+        </li>
+        <li>
+          <strong>MediaPipe Tasks API:</strong> Face Mesh Coordinate Map, Google AI Research Team.
+        </li>
+      </ol>
+    </section>
+
+  </main>
+
+  <!-- Interactive JavaScript Logic -->
+  <script>
+    // Theme Toggling
+    function toggleTheme() {
+      const body = document.body;
+      const themeBtn = document.getElementById('themeBtn');
+      
+      body.classList.toggle('light-theme');
+      
+      if (body.classList.contains('light-theme')) {
+        themeBtn.innerHTML = 'Dark Mode';
+        themeBtn.setAttribute('title', 'Switch to Dark Mode');
+      } else {
+        themeBtn.innerHTML = 'Light Mode';
+        themeBtn.setAttribute('title', 'Switch to Light Mode');
+      }
+      updateGazeSim();
+    }
+
+    // Print Preview Mode Toggle
+    function togglePrintPreview() {
+      const body = document.body;
+      body.classList.toggle('print-preview-active');
+      
+      // Update sidebar nav state visual or trigger scroll update
+      window.dispatchEvent(new Event('resize'));
+      updateGazeSim();
+    }
+
+    // Smooth scroll navigation highlighter
+    const sections = document.querySelectorAll('section');
+    const navItems = document.querySelectorAll('.nav-item');
+
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (pageYOffset >= (sectionTop - 150)) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        const href = item.querySelector('a').getAttribute('href').substring(1);
+        if (href === current) {
+          item.classList.add('active');
+        }
+      });
+    });
+
+    // ----------------------------------------------------
+    // WIDGET 1: 3D GAZE CANVAS EMULATOR
+    // ----------------------------------------------------
+    const canvas = document.getElementById('gazeCanvas');
+    const ctx = canvas.getContext('2d');
+    const yawSlider = document.getElementById('yawSlider');
+    const pitchSlider = document.getElementById('pitchSlider');
+    const yawVal = document.getElementById('yawVal');
+    const pitchVal = document.getElementById('pitchVal');
+    const vectorDisplay = document.getElementById('vectorDisplay');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const riskWeightDisplay = document.getElementById('riskWeightDisplay');
+    const riskBadge = document.getElementById('riskBadge');
+
+    // High-fidelity 3D facial topology vertex mapping (X, Y, Z coordinates centered at face origin)
+    const originalVertices = [
+      // Face contour (U-shape jawline & forehead arches)
+      {x: -60, y: -70, z: -10}, // 0: Left temple
+      {x: -65, y: -30, z: -15}, // 1: Left cheek upper
+      {x: -60, y: 20, z: -20},  // 2: Left cheek lower
+      {x: -35, y: 60, z: -15},  // 3: Left jaw
+      {x: 0, y: 75, z: 0},      // 4: Chin (middle bottom)
+      {x: 35, y: 60, z: -15},   // 5: Right jaw
+      {x: 60, y: 20, z: -20},   // 6: Right cheek lower
+      {x: 65, y: -30, z: -15},  // 7: Right cheek upper
+      {x: 60, y: -70, z: -10},  // 8: Right temple
+      {x: 0, y: -85, z: -5},    // 9: Forehead center
+      
+      // Left eye outline
+      {x: -30, y: -25, z: 15},  // 10: Left corner
+      {x: -20, y: -30, z: 18},  // 11: Top lid
+      {x: -10, y: -25, z: 15},  // 12: Right corner
+      {x: -20, y: -20, z: 18},  // 13: Bottom lid
+      
+      // Right eye outline
+      {x: 10, y: -25, z: 15},   // 14: Left corner
+      {x: 20, y: -30, z: 18},   // 15: Top lid
+      {x: 30, y: -25, z: 15},   // 16: Right corner
+      {x: 20, y: -20, z: 18},   // 17: Bottom lid
+      
+      // Nose structure
+      {x: 0, y: -40, z: 15},    // 18: Nose bridge top (glabella)
+      {x: 0, y: 0, z: 50},      // 19: Nose tip (pronasale - key PnP reference)
+      {x: -12, y: 15, z: 25},   // 20: Nose left base (alare)
+      {x: 12, y: 15, z: 25},    // 21: Nose right base (alare)
+      
+      // Mouth / Lips contour
+      {x: -25, y: 35, z: 20},   // 22: Left cheilion
+      {x: 0, y: 28, z: 28},     // 23: Upper lip center (labrale superius)
+      {x: 25, y: 35, z: 20},    // 24: Right cheilion
+      {x: 0, y: 44, z: 25},     // 25: Lower lip center (labrale inferius)
+      
+      // Left eyebrow arch
+      {x: -35, y: -42, z: 8},   // 26
+      {x: -22, y: -46, z: 12},  // 27
+      {x: -8, y: -42, z: 10},   // 28
+      
+      // Right eyebrow arch
+      {x: 8, y: -42, z: 10},    // 29
+      {x: 22, y: -46, z: 12},   // 30
+      {x: 35, y: -42, z: 8}     // 31
+    ];
+
+    const lines = [
+      // Outer face boundary contour
+      [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 0],
+      
+      // Left eye loop
+      [10, 11], [11, 12], [12, 13], [13, 10],
+      
+      // Right eye loop
+      [14, 15], [15, 16], [16, 17], [17, 14],
+      
+      // Nose skeleton
+      [18, 19], // Bridge to Tip
+      [19, 20], [19, 21], // Tip to alae bases
+      [20, 21], // Base connection
+      [18, 10], [18, 14], // Bridge to eyes
+      
+      // Mouth boundary loop
+      [22, 23], [23, 24], [24, 25], [25, 22],
+      
+      // Eyebrows curves
+      [26, 27], [27, 28], // Left brow
+      [29, 30], [30, 31]  // Right brow
+    ];
+
+    function draw3DFace(yaw, pitch) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      const width = canvas.width;
+      const height = canvas.height;
+      const cx = width / 2;
+      const cy = height / 2;
+      
+      // Compute rotated vertices
+      const rotated = originalVertices.map(v => {
+        // Rotate Pitch (around X axis)
+        let y1 = v.y * Math.cos(pitch) - v.z * Math.sin(pitch);
+        let z1 = v.y * Math.sin(pitch) + v.z * Math.cos(pitch);
+        
+        // Rotate Yaw (around Y axis)
+        let x2 = v.x * Math.cos(yaw) + z1 * Math.sin(yaw);
+        let z2 = -v.x * Math.sin(yaw) + z1 * Math.cos(yaw);
+        
+        // Perspective Projection
+        const scale = 160 / (200 + z2);
+        return {
+          x: cx + x2 * scale,
+          y: cy + y1 * scale
+        };
+      });
+
+      // Define stroke style based on theme and print-preview mode
+      const body = document.body;
+      const isAcademicPrint = body.classList.contains('print-preview-active');
+      const isLightTheme = body.classList.contains('light-theme');
+      
+      if (isAcademicPrint) {
+        ctx.strokeStyle = '#111111';
+      } else {
+        ctx.strokeStyle = isLightTheme ? '#0f172a' : '#38bdf8';
+      }
+      
+      ctx.lineWidth = 1.2;
+      lines.forEach(pair => {
+        const p1 = rotated[pair[0]];
+        const p2 = rotated[pair[1]];
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      });
+
+      // Draw points
+      if (isAcademicPrint) {
+        ctx.fillStyle = '#111111';
+      } else {
+        ctx.fillStyle = '#10b981';
+      }
+      
+      rotated.forEach((p, idx) => {
+        ctx.beginPath();
+        // Draw the primary 6 PnP solver control points slightly larger
+        const isControlPoint = [10, 16, 19, 22, 24, 4].includes(idx); // Left eye outer corner (10), Right eye outer corner (16), Nose tip (19), mouth corners (22,24), Chin (4)
+        ctx.arc(p.x, p.y, isControlPoint ? 2.5 : 1.2, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Project Gaze Vector (draw line pointing from rotated nose tip)
+      const nose = rotated[19];
+      const vx = Math.sin(yaw) * Math.cos(pitch);
+      const vy = -Math.sin(pitch);
+      const vz = Math.cos(yaw) * Math.cos(pitch);
+
+      const scaleNose = 160 / (200 + originalVertices[19].z + vz * 50);
+      const targetX = cx + (originalVertices[19].x + vx * 50) * scaleNose;
+      const targetY = cy + (originalVertices[19].y + vy * 50) * scaleNose;
+
+      ctx.strokeStyle = isAcademicPrint ? '#111111' : '#ef4444';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(nose.x, nose.y);
+      ctx.lineTo(targetX, targetY);
+      ctx.stroke();
+      
+      ctx.fillStyle = isAcademicPrint ? '#111111' : '#ef4444';
+      ctx.beginPath();
+      ctx.arc(targetX, targetY, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw 3D reference frame axes in bottom-left corner of the canvas
+      const ox = 30;
+      const oy = height - 30;
+      
+      const rotateAxisVector = (ax, ay, az) => {
+        // Pitch
+        let ry1 = ay * Math.cos(pitch) - az * Math.sin(pitch);
+        let rz1 = ay * Math.sin(pitch) + az * Math.cos(pitch);
+        // Yaw
+        let rx2 = ax * Math.cos(yaw) + rz1 * Math.sin(yaw);
+        return { x: rx2, y: ry1 };
+      };
+
+      const axLength = 18;
+      const rotX = rotateAxisVector(axLength, 0, 0);
+      const rotY = rotateAxisVector(0, axLength, 0);
+      const rotZ = rotateAxisVector(0, 0, axLength);
+
+      // X Axis (Pitch Axis - Red)
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(ox, oy);
+      ctx.lineTo(ox + rotX.x, oy + rotX.y);
+      ctx.stroke();
+      ctx.fillStyle = '#ef4444';
+      ctx.font = '7px monospace';
+      ctx.fillText('X', ox + rotX.x + 3, oy + rotX.y + 2);
+
+      // Y Axis (Yaw Axis - Green)
+      ctx.strokeStyle = '#10b981';
+      ctx.beginPath();
+      ctx.moveTo(ox, oy);
+      ctx.lineTo(ox + rotY.x, oy + rotY.y);
+      ctx.stroke();
+      ctx.fillStyle = '#10b981';
+      ctx.fillText('Y', ox + rotY.x + 3, oy + rotY.y + 2);
+
+      // Z Axis (Gaze vector - Blue)
+      ctx.strokeStyle = '#3b82f6';
+      ctx.beginPath();
+      ctx.moveTo(ox, oy);
+      ctx.lineTo(ox + rotZ.x, oy + rotZ.y);
+      ctx.stroke();
+      ctx.fillStyle = '#3b82f6';
+      ctx.fillText('Z', ox + rotZ.x + 3, oy + rotZ.y + 2);
+    }
+
+    function updateGazeSim() {
+      const yaw = parseFloat(yawSlider.value);
+      const pitch = parseFloat(pitchSlider.value);
+      
+      yawVal.textContent = yaw.toFixed(2) + ' rad';
+      pitchVal.textContent = pitch.toFixed(2) + ' rad';
+      
+      const vx = Math.sin(yaw) * Math.cos(pitch);
+      const vy = -Math.sin(pitch);
+      const vz = Math.cos(yaw) * Math.cos(pitch);
+      vectorDisplay.textContent = `[${vx.toFixed(2)}, ${vy.toFixed(2)}, ${vz.toFixed(2)}]`;
+      
+      const yawLimit = 0.20;
+      const pitchLimitUp = 0.20;
+      const pitchLimitDown = 0.15;
+      
+      let looksAway = false;
+      let pitchViolation = false;
+      
+      if (Math.abs(yaw) > yawLimit) {
+        looksAway = true;
+      }
+      
+      if (pitch < -pitchLimitUp || pitch > pitchLimitDown) {
+        pitchViolation = true;
+      }
+
+      const statusNode = document.getElementById('statusIndicator');
+      const weightNode = document.getElementById('riskWeightDisplay');
+      
+      if (looksAway && pitchViolation) {
+        statusNode.textContent = "YAW + PITCH VIOLATION";
+        statusNode.style.color = 'var(--accent-red)';
+        weightNode.textContent = '1.0 (Aggregated)';
+        riskBadge.textContent = 'High Violation';
+        riskBadge.style.background = 'var(--accent-red)';
+      } else if (looksAway) {
+        statusNode.textContent = "GAZE AVERSION (YAW)";
+        statusNode.style.color = 'var(--accent-amber)';
+        weightNode.textContent = '0.5';
+        riskBadge.textContent = 'Gaze Warning';
+        riskBadge.style.background = 'var(--accent-amber)';
+      } else if (pitchViolation) {
+        statusNode.textContent = "PITCH VIOLATION";
+        statusNode.style.color = 'var(--accent-amber)';
+        weightNode.textContent = '0.5';
+        riskBadge.textContent = 'Pitch Warning';
+        riskBadge.style.background = 'var(--accent-amber)';
+      } else {
+        statusNode.textContent = "CENTERED";
+        statusNode.style.color = 'var(--accent-green)';
+        weightNode.textContent = '0.0';
+        riskBadge.textContent = 'Normal';
+        riskBadge.style.background = 'var(--accent-green)';
+      }
+
+      draw3DFace(yaw, pitch);
+    }
+
+    yawSlider.addEventListener('input', updateGazeSim);
+    pitchSlider.addEventListener('input', updateGazeSim);
+    
+    // Fit canvas resolution
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    
+    // Initialize
+    updateGazeSim();
+
+    // ----------------------------------------------------
+    // WIDGET 2: RISK ENGINE SIMULATOR
+    // ----------------------------------------------------
+    function calculateRiskSim() {
+      const chkPhone = document.getElementById('chkPhone').checked;
+      const chkMultiple = document.getElementById('chkMultiple').checked;
+      const chkAudio = document.getElementById('chkAudio').checked;
+      const chkGaze = document.getElementById('chkGaze').checked;
+      const chkNoFace = document.getElementById('chkNoFace').checked;
+
+      let frameScore = 0.0;
+      const reasons = [];
+
+      if (chkPhone) {
+        frameScore += 1.0;
+        reasons.push("Forbidden object detected: cell phone");
+      }
+      if (chkMultiple) {
+        frameScore += 0.8;
+        reasons.push("Multiple people detected (2)");
+      }
+      if (chkAudio) {
+        frameScore += 0.7;
+        reasons.push("Audio/Speech Detected (58.4 dB)");
+      }
+      if (chkGaze) {
+        frameScore += 0.5;
+        reasons.push("Extensive looking away (0.34)");
+      }
+      if (chkNoFace) {
+        frameScore += 0.6;
+        reasons.push("Face missing for 42 frames");
+      }
+
+      // Determine level
+      let level = "LOW";
+      let levelColor = "var(--accent-green)";
+      if (frameScore >= 0.8) {
+        level = "HIGH";
+        levelColor = "var(--accent-red)";
+      } else if (frameScore >= 0.4) {
+        level = "MEDIUM";
+        levelColor = "var(--accent-amber)";
+      }
+
+      document.getElementById('riskScore').textContent = frameScore.toFixed(2);
+      const indicator = document.getElementById('riskLevelIndicator');
+      indicator.textContent = level + " RISK";
+      indicator.style.color = levelColor;
+
+      // Generate telemetry JSON
+      const telemetryObj = {
+        timestamp: Date.now() / 1000,
+        risk_level: level,
+        accumulated_score: parseFloat(frameScore.toFixed(2)),
+        reasons: reasons,
+        session_id: "session_x9a8b11c",
+        active_modules: ["face", "object", "audio"],
+        device_details: {
+          browser: "Chrome (Headless Emulator)",
+          platform: "Win32"
+        }
+      };
+
+      document.getElementById('jsonTelemetry').textContent = JSON.stringify(telemetryObj, null, 2);
+    }
+
+    // Initialize Risk Sim
+    calculateRiskSim();
+
+    // Trigger canvas redraw on resize for correct coordinates projection
+    window.addEventListener('resize', () => {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+      updateGazeSim();
+    });
+  </script>
+</body>
+</html>
